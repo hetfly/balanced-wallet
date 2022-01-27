@@ -10,6 +10,8 @@ import {
   ICONexResponseEventType,
 } from 'packages/iconex';
 
+import useLocalStorage from 'hooks/useLocalStorage';
+
 export const GOVERNANCE_BASE_ADDRESS = 'cx0000000000000000000000000000000000000001';
 
 export const API_VERSION = IconConverter.toBigNumber(3);
@@ -36,7 +38,7 @@ interface ICONReactContextInterface {
 }
 
 const IconReactContext = React.createContext<ICONReactContextInterface>({
-  account: undefined,
+  account: null,
   ledgerAddressPoint: -1,
   request: request,
   requestAddress: (ledgerAccount?: { address: string; point: number }) => null,
@@ -48,27 +50,30 @@ const IconReactContext = React.createContext<ICONReactContextInterface>({
 
 export function IconReactProvider({ children }) {
   const [ledgerAddressPoint, setLedgerAddressPoint] = React.useState(-1);
-  const [account, setAccount] = React.useState<string | null>();
+  const [account, setAccount] = useLocalStorage<string | null>('account', null);
   const [hasExtension, setHasExtension] = React.useState<boolean>(false);
 
-  const requestAddress = React.useCallback(async (ledgerAccount?: { address: string; point: number }) => {
-    if (!ledgerAccount) {
-      const detail = await request({
-        type: ICONexRequestEventType.REQUEST_ADDRESS,
-      });
+  const requestAddress = React.useCallback(
+    async (ledgerAccount?: { address: string; point: number }) => {
+      if (!ledgerAccount) {
+        const detail = await request({
+          type: ICONexRequestEventType.REQUEST_ADDRESS,
+        });
 
-      if (detail?.type === ICONexResponseEventType.RESPONSE_ADDRESS) {
-        setAccount(detail?.payload);
+        if (detail?.type === ICONexResponseEventType.RESPONSE_ADDRESS) {
+          setAccount(detail?.payload);
+        }
+      } else if (ledgerAccount) {
+        setAccount(ledgerAccount?.address);
+        setLedgerAddressPoint(ledgerAccount?.point || 0);
       }
-    } else if (ledgerAccount) {
-      setAccount(ledgerAccount?.address);
-      setLedgerAddressPoint(ledgerAccount?.point || 0);
-    }
-  }, []);
+    },
+    [setAccount],
+  );
 
   const disconnect = React.useCallback(() => {
     setAccount(null);
-  }, []);
+  }, [setAccount]);
 
   React.useEffect(() => {
     const handler = async () => {
