@@ -6,7 +6,6 @@ import { Box } from 'rebass/styled-components';
 import styled from 'styled-components';
 
 import TransactionPanel from 'app/components/home/TransactionPanel';
-import WalletPanel from 'app/components/home/WalletPanel';
 import { DefaultLayout } from 'app/components/Layout';
 import { useCollateralFetchInfo } from 'store/collateral/hooks';
 import { useLoanFetchInfo } from 'store/loan/hooks';
@@ -53,7 +52,6 @@ export function HomePage() {
 
       {account ? (
         <Grid>
-          <WalletPanel />
           <TransactionPanel />
         </Grid>
       ) : (
