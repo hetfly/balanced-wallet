@@ -195,18 +195,13 @@ const Wallet = ({ setAnchor, anchor, ...rest }) => {
   const transactions = useAllTransactions();
   const [claimableICX, setClaimableICX] = useState(new BigNumber(0));
   const details = useBALNDetails();
-  const stakedBALN: BigNumber = React.useMemo(() => details['Staked balance'] || new BigNumber(0), [details]);
-  const unstakingBALN: BigNumber = React.useMemo(() => details['Unstaking balance'] || new BigNumber(0), [details]);
   const totalBALN: BigNumber = React.useMemo(() => details['Total balance'] || new BigNumber(0), [details]);
-  const isAvailable = stakedBALN.isGreaterThan(new BigNumber(0)) || unstakingBALN.isGreaterThan(new BigNumber(0));
   const { data: rates } = useRatesQuery();
   const { account } = useIconReact();
   const [searchQuery, setSearchQuery] = useState('');
   const enter = useKeyPress('Enter');
   const escape = useKeyPress('Escape');
   const [isOpen, setOpen] = useState(false);
-
-  const availableBALN = balances && <Typography>Available: {balances['BALN']?.dp(2).toFormat()}</Typography>;
 
   useEffect(() => {
     (async () => {
@@ -270,7 +265,6 @@ const Wallet = ({ setAnchor, anchor, ...rest }) => {
               : token.symbol!.toLowerCase() === 'baln'
               ? totalBALN.dp(2).toFormat()
               : balances[token.symbol!].dp(2).toFormat()}
-            {token.symbol!.toLowerCase() === 'baln' && isAvailable && !isSmallScreen && <>{availableBALN}</>}
           </DataText>
 
           <DataText className="value" as="div">
@@ -279,12 +273,6 @@ const Wallet = ({ setAnchor, anchor, ...rest }) => {
               : token.symbol!.toLowerCase() === 'baln'
               ? `$${totalBALN.multipliedBy(rates[token.symbol!]).dp(2).toFormat()}`
               : `$${balances[token.symbol!].multipliedBy(rates[token.symbol!]).dp(2).toFormat()}`}
-            {token.symbol!.toLowerCase() === 'baln' && isAvailable && isSmallScreen && <>{availableBALN}</>}
-            {token.symbol!.toLowerCase() === 'baln' && isAvailable && rates && rates[token.symbol!] && (
-              <>
-                <Typography>${balances['BALN'].multipliedBy(rates[token.symbol!]).dp(2).toFormat()}</Typography>
-              </>
-            )}
           </DataText>
         </BalanceAndValueWrap>
       </>
